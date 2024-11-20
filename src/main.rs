@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 struct Site<'a> {
     name: &'a str,
     url: &'a str,
@@ -10,16 +12,25 @@ impl<'a> Site<'a> {
 }
 
 fn main() {
-    let sites = vec![Site::new("GitHub", "github.com")];
+    let sites = vec![
+        Site::new("GitHub", "https://github.com"),
+        Site::new("Google", "https://google.com"),
+        Site::new("Steam", "https://steampowered.com"),
+    ];
 
     for Site { name, url } in sites {
-        let status = check_connection(url);
-        println!("{status}: {name}");
+        let status_str = {
+            let status = check_connection(url);
+            match status.as_u16() {
+                200 => "■".green(),
+                _ => "■".red(),
+            }
+        };
+
+        println!("{status_str} {name}");
     }
 }
 
 fn check_connection(url: &str) -> reqwest::StatusCode {
-    reqwest::blocking::get("https://github.com")
-        .map(|s| s.status())
-        .unwrap()
+    reqwest::blocking::get(url).map(|s| s.status()).unwrap()
 }
