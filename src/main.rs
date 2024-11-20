@@ -19,18 +19,14 @@ fn main() {
     ];
 
     for Site { name, url } in sites {
-        let status_str = {
-            let status = check_connection(url);
-            match status.as_u16() {
+        let status_str = reqwest::blocking::get(url).map_or_else(
+            |_| "■".red(),
+            |response| match response.status().as_u16() {
                 200 => "■".green(),
                 _ => "■".red(),
-            }
-        };
+            },
+        );
 
         println!("{status_str} {name}");
     }
-}
-
-fn check_connection(url: &str) -> reqwest::StatusCode {
-    reqwest::blocking::get(url).map(|s| s.status()).unwrap()
 }
