@@ -1,20 +1,24 @@
-struct Site {
-    name: &str,
-    url: &str,
+struct Site<'a> {
+    name: &'a str,
+    url: &'a str,
 }
 
-fn main() {
-    let urls = vec![
-        "github.com",
-    ];
-
-    for url in urls {
-        let status = request_site(url);
-        println!("")
+impl<'a> Site<'a> {
+    const fn new(name: &'a str, url: &'a str) -> Self {
+        Self { name, url }
     }
 }
 
-fn request_site(url: &str) -> reqwest::StatusCode {
+fn main() {
+    let sites = vec![Site::new("GitHub", "github.com")];
+
+    for Site { name, url } in sites {
+        let status = check_connection(url);
+        println!("{status}: {name}");
+    }
+}
+
+fn check_connection(url: &str) -> reqwest::StatusCode {
     reqwest::blocking::get("https://github.com")
         .map(|s| s.status())
         .unwrap()
