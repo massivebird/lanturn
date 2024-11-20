@@ -17,10 +17,12 @@
 
         # `nix develop`
         devShell = mkShell {
-          buildInputs = [
+          packages = [
             cargo
             openssl
             pkg-config
+            clippy
+            rust-analyzer
             rustc
           ];
         };
