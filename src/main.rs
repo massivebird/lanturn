@@ -135,10 +135,11 @@ fn ui(f: &mut Frame, app: &App) {
 }
 
 fn update_cache(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
-    let addr = sites.lock().unwrap().get(idx).unwrap().addr.clone();
-
-    let response =
-        reqwest::blocking::get(addr).map_or_else(|_| Some(Err(())), |response| Some(Ok(response)));
+    let response = reqwest::blocking::Client::new()
+        .get(sites.lock().unwrap().get(idx).unwrap().addr.clone())
+        .timeout(Duration::from_secs(1))
+        .send()
+        .map_or_else(|_| Some(Err(())), |response| Some(Ok(response)));
 
     sites.lock().unwrap().get_mut(idx).unwrap().latest_response = response;
 }
