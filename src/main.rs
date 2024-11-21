@@ -1,17 +1,21 @@
-use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
-use crossterm::execute;
-use crossterm::terminal::{
-    disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
+use crossterm::{
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use ratatui::backend::{Backend, CrosstermBackend};
-use ratatui::layout::Rect;
-use ratatui::style::Stylize;
-use ratatui::text::{Line, Span};
-use ratatui::widgets::List;
-use ratatui::{Frame, Terminal};
-use std::io;
-use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant};
+use ratatui::{
+    backend::{Backend, CrosstermBackend},
+    layout::Rect,
+    style::Stylize,
+    text::{Line, Span},
+    widgets::List,
+    Frame, Terminal,
+};
+use std::{
+    io,
+    sync::{Arc, Mutex},
+    time::{Duration, Instant},
+};
 
 struct App {
     sites: Arc<Mutex<Vec<Site>>>,
