@@ -82,7 +82,7 @@ fn commence_application<B: Backend>(
     let num_sites = sites.lock().unwrap().len();
 
     std::thread::spawn(move || loop {
-        for idx in (0..=num_sites).cycle() {
+        for idx in (0..num_sites).cycle() {
             update_cache(&Arc::clone(&sites), idx);
         }
     });
@@ -108,13 +108,13 @@ fn commence_application<B: Backend>(
 }
 
 fn ui(f: &mut Frame, app: &App) {
-    let icon = "■";
-
-    for (idx, site) in app.sites.lock().unwrap().iter().enumerate() {
+    let guard = app.sites.lock().unwrap();
+    for (idx, site) in guard.iter().enumerate() {
+        let mut _span: Span = Span::from("■");
         let mut span: Span = Span::from(site.name.clone());
 
         if site.latest_response.is_none() {
-            span = span.dark_gray();
+            span = span.gray();
         } else {
             match site.latest_response.as_ref() {
                 Some(Ok(response)) => {
@@ -123,14 +123,14 @@ fn ui(f: &mut Frame, app: &App) {
                         _ => span = span.yellow(),
                     };
                 }
-                _ => span = Span::from(icon).red(),
+                _ => span = span.red(),
             };
-
-            f.render_widget(
-                span,
-                Rect::new(0, idx as u16, f.area().width, f.area().height),
-            );
         }
+
+        f.render_widget(
+            span,
+            Rect::new(0, idx as u16, f.area().width, f.area().height),
+        );
     }
 }
 
@@ -138,7 +138,7 @@ fn update_cache(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
     let addr = sites.lock().unwrap().get(idx).unwrap().addr.clone();
 
     let response =
-        reqwest::blocking::get(addr).map_or_else(|_| todo!(), |response| Some(Ok(response)));
+        reqwest::blocking::get(addr).map_or_else(|_| Some(Err(())), |response| Some(Ok(response)));
 
     sites.lock().unwrap().get_mut(idx).unwrap().latest_response = response;
 }
