@@ -1,11 +1,14 @@
-use colored::Colorize;
 use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
 use crossterm::execute;
 use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
 use ratatui::backend::{Backend, CrosstermBackend};
+use ratatui::layout::Rect;
+use ratatui::style::Stylize;
+use ratatui::text::Span;
 use ratatui::{Frame, Terminal};
+use reqwest::blocking::Response;
 use std::io;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -14,11 +17,10 @@ struct App {
     sites: Arc<Mutex<Vec<Site>>>,
 }
 
-#[derive(Clone)]
 struct Site {
     name: String,
     addr: String,
-    status: Option<u16>,
+    latest_response: Option<Result<Response, ()>>,
 }
 
 impl Site {
@@ -26,7 +28,7 @@ impl Site {
         Self {
             name: name.to_string(),
             addr: addr.to_string(),
-            status: None,
+            latest_response: None,
         }
     }
 }
@@ -77,9 +79,12 @@ fn commence_application<B: Backend>(
     let mut last_tick = Instant::now();
 
     let sites = Arc::clone(&app.sites);
+    let num_sites = sites.lock().unwrap().len();
 
     std::thread::spawn(move || loop {
-        update_cache(&Arc::clone(&sites));
+        for idx in (0..=num_sites).cycle() {
+            update_cache(&Arc::clone(&sites), idx);
+        }
     });
 
     loop {
@@ -103,22 +108,37 @@ fn commence_application<B: Backend>(
 }
 
 fn ui(f: &mut Frame, app: &App) {
-    // let status_str = reqwest::blocking::get(site.addr).map_or_else(
-    //     |_| "■".red(),
-    //     |response| match response.status().as_u16() {
-    //         200 => "■".green(),
-    //         _ => "■".red(),
-    //     },
-    // );
+    let icon = "■";
+
+    for (idx, site) in app.sites.lock().unwrap().iter().enumerate() {
+        let mut span: Span = Span::from(site.name.clone());
+
+        if site.latest_response.is_none() {
+            span = span.dark_gray();
+        } else {
+            match site.latest_response.as_ref() {
+                Some(Ok(response)) => {
+                    match response.status().as_u16() {
+                        200 => span = span.green(),
+                        _ => span = span.yellow(),
+                    };
+                }
+                _ => span = Span::from(icon).red(),
+            };
+
+            f.render_widget(
+                span,
+                Rect::new(0, idx as u16, f.area().width, f.area().height),
+            );
+        }
+    }
 }
 
-fn update_cache(sites: &Arc<Mutex<Vec<Site>>>) {
-    for (idx, site) in sites.lock().unwrap().iter().enumerate().cycle() {
-        let status_code = reqwest::blocking::get(site.addr.clone())
-            .unwrap()
-            .status()
-            .as_u16();
+fn update_cache(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
+    let addr = sites.lock().unwrap().get(idx).unwrap().addr.clone();
 
-        sites.lock().unwrap().get_mut(idx).unwrap().status = Some(status_code);
-    }
+    let response =
+        reqwest::blocking::get(addr).map_or_else(|_| todo!(), |response| Some(Ok(response)));
+
+    sites.lock().unwrap().get_mut(idx).unwrap().latest_response = response;
 }
