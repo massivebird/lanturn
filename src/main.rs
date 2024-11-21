@@ -6,7 +6,8 @@ use crossterm::terminal::{
 use ratatui::backend::{Backend, CrosstermBackend};
 use ratatui::layout::Rect;
 use ratatui::style::Stylize;
-use ratatui::text::Span;
+use ratatui::text::{Line, Span};
+use ratatui::widgets::List;
 use ratatui::{Frame, Terminal};
 use reqwest::blocking::Response;
 use std::io;
@@ -114,29 +115,38 @@ fn ui(f: &mut Frame, app: &App) {
         guard.clone()
     };
 
+    let mut list_items: Vec<Line<'_>> = Vec::new();
+
     for (idx, site) in sites.iter().enumerate() {
-        let mut _span: Span = Span::from("■");
-        let mut span: Span = Span::from(site.name.clone());
+        let mut status_icon: Span = Span::from(" ■ ");
 
         if site.status_code.is_none() {
-            span = span.gray();
+            status_icon = status_icon.gray();
         } else {
             match site.status_code.as_ref() {
                 Some(Ok(status_code)) => {
                     match status_code {
-                        200 => span = span.green(),
-                        _ => span = span.yellow(),
+                        200 => status_icon = status_icon.green(),
+                        _ => status_icon = status_icon.yellow(),
                     };
                 }
-                _ => span = span.red(),
+                _ => status_icon = status_icon.red(),
             };
         }
 
-        f.render_widget(
-            span,
-            Rect::new(0, idx as u16, f.area().width, f.area().height),
+        list_items.push(
+            vec![
+                status_icon,
+                Span::from(site.name.clone()),
+            ]
+            .into(),
         );
     }
+
+    f.render_widget(
+        List::new(list_items),
+        Rect::new(0, 0, f.area().width, f.area().height),
+    );
 }
 
 fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
