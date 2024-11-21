@@ -9,7 +9,6 @@ use ratatui::style::Stylize;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::List;
 use ratatui::{Frame, Terminal};
-use reqwest::blocking::Response;
 use std::io;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -117,7 +116,7 @@ fn ui(f: &mut Frame, app: &App) {
 
     let mut list_items: Vec<Line<'_>> = Vec::new();
 
-    for (idx, site) in sites.iter().enumerate() {
+    for site in sites.iter() {
         let mut status_icon: Span = Span::from(" ■ ");
 
         if site.status_code.is_none() {
@@ -134,13 +133,7 @@ fn ui(f: &mut Frame, app: &App) {
             };
         }
 
-        list_items.push(
-            vec![
-                status_icon,
-                Span::from(site.name.clone()),
-            ]
-            .into(),
-        );
+        list_items.push(vec![status_icon, Span::from(site.name.clone())].into());
     }
 
     f.render_widget(
