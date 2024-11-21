@@ -17,10 +17,11 @@ struct App {
     sites: Arc<Mutex<Vec<Site>>>,
 }
 
+#[derive(Clone)]
 struct Site {
     name: String,
     addr: String,
-    latest_response: Option<Result<Response, ()>>,
+    status_code: Option<Result<u16, ()>>,
 }
 
 impl Site {
@@ -28,7 +29,7 @@ impl Site {
         Self {
             name: name.to_string(),
             addr: addr.to_string(),
-            latest_response: None,
+            status_code: None,
         }
     }
 }
@@ -83,7 +84,7 @@ fn commence_application<B: Backend>(
 
     std::thread::spawn(move || loop {
         for idx in (0..num_sites).cycle() {
-            update_cache(&Arc::clone(&sites), idx);
+            fetch_site(&Arc::clone(&sites), idx);
         }
     });
 
@@ -108,17 +109,21 @@ fn commence_application<B: Backend>(
 }
 
 fn ui(f: &mut Frame, app: &App) {
-    let guard = app.sites.lock().unwrap();
-    for (idx, site) in guard.iter().enumerate() {
+    let sites = {
+        let guard = app.sites.lock().unwrap();
+        guard.clone()
+    };
+
+    for (idx, site) in sites.iter().enumerate() {
         let mut _span: Span = Span::from("■");
         let mut span: Span = Span::from(site.name.clone());
 
-        if site.latest_response.is_none() {
+        if site.status_code.is_none() {
             span = span.gray();
         } else {
-            match site.latest_response.as_ref() {
-                Some(Ok(response)) => {
-                    match response.status().as_u16() {
+            match site.status_code.as_ref() {
+                Some(Ok(status_code)) => {
+                    match status_code {
                         200 => span = span.green(),
                         _ => span = span.yellow(),
                     };
@@ -134,12 +139,15 @@ fn ui(f: &mut Frame, app: &App) {
     }
 }
 
-fn update_cache(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
-    let response = reqwest::blocking::Client::new()
+fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
+    let client = reqwest::blocking::Client::new()
         .get(sites.lock().unwrap().get(idx).unwrap().addr.clone())
-        .timeout(Duration::from_secs(1))
-        .send()
-        .map_or_else(|_| Some(Err(())), |response| Some(Ok(response)));
+        .timeout(Duration::from_secs(1));
 
-    sites.lock().unwrap().get_mut(idx).unwrap().latest_response = response;
+    let mut guard = sites.lock().unwrap();
+
+    guard.get_mut(idx).unwrap().status_code = client.send().map_or_else(
+        |_| Some(Err(())),
+        |response| Some(Ok(response.status().as_u16())),
+    );
 }
