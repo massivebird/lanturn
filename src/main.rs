@@ -6,7 +6,7 @@ use crossterm::{
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::Rect,
-    style::Color,
+    style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::List,
     Frame, Terminal,
@@ -19,6 +19,12 @@ use std::{
 
 struct App {
     sites: Arc<Mutex<Vec<Site>>>,
+    output_fmt: OutputFmt,
+}
+
+enum OutputFmt {
+    Bullet,
+    Line,
 }
 
 #[derive(Clone)]
@@ -56,6 +62,7 @@ fn main() -> io::Result<()> {
 
     let app = App {
         sites: Arc::new(Mutex::new(sites)),
+        output_fmt: OutputFmt::Line,
     };
 
     let res = commence_application(&mut terminal, ui_refresh_rate, &app);
@@ -123,7 +130,7 @@ fn ui(f: &mut Frame, app: &App) {
     for site in &sites {
         // Computing the color reflective of online status.
         // Green is OK, red is bad, etc.
-        let color = {
+        let status_color = {
             if site.status_code.is_none() {
                 Color::Red
             } else {
@@ -137,13 +144,20 @@ fn ui(f: &mut Frame, app: &App) {
             }
         };
 
-        list_items.push(
-            vec![
-                Span::from(" ■ ").style(color),
+        let site_output: Line<'_> = match app.output_fmt {
+            OutputFmt::Bullet => Line::from(vec![
+                Span::from(" ■ ").style(status_color),
                 Span::from(site.name.clone()),
-            ]
-            .into(),
-        );
+            ]),
+            OutputFmt::Line => Line::from(Span::from(format!(" {}", site.name.clone()))).style(
+                Style::new()
+                    .bg(status_color)
+                    .fg(Color::Black)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        };
+
+        list_items.push(site_output);
     }
 
     f.render_widget(
