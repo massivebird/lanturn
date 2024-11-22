@@ -6,7 +6,7 @@ use crossterm::{
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::Rect,
-    style::Stylize,
+    style::Color,
     text::{Line, Span},
     widgets::List,
     Frame, Terminal,
@@ -120,24 +120,30 @@ fn ui(f: &mut Frame, app: &App) {
 
     let mut list_items: Vec<Line<'_>> = Vec::new();
 
-    for site in sites.iter() {
-        let mut status_icon: Span = Span::from(" ■ ");
-
-        if site.status_code.is_none() {
-            status_icon = status_icon.gray();
-        } else {
-            match site.status_code.as_ref() {
-                Some(Ok(status_code)) => {
-                    match status_code {
-                        200 => status_icon = status_icon.green(),
-                        _ => status_icon = status_icon.yellow(),
-                    };
+    for site in &sites {
+        // Computing the color reflective of online status.
+        // Green is OK, red is bad, etc.
+        let color = {
+            if site.status_code.is_none() {
+                Color::Red
+            } else {
+                match site.status_code.as_ref() {
+                    Some(Ok(status_code)) => match status_code {
+                        200 => Color::Green,
+                        _ => Color::Yellow,
+                    },
+                    _ => Color::Red,
                 }
-                _ => status_icon = status_icon.red(),
-            };
-        }
+            }
+        };
 
-        list_items.push(vec![status_icon, Span::from(site.name.clone())].into());
+        list_items.push(
+            vec![
+                Span::from(" ■ ").style(color),
+                Span::from(site.name.clone()),
+            ]
+            .into(),
+        );
     }
 
     f.render_widget(
@@ -149,7 +155,7 @@ fn ui(f: &mut Frame, app: &App) {
 fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
     let client = reqwest::blocking::Client::new()
         .get(sites.lock().unwrap().get(idx).unwrap().addr.clone())
-        .timeout(Duration::from_secs(1));
+        .timeout(Duration::from_secs(3));
 
     let mut guard = sites.lock().unwrap();
 
