@@ -17,34 +17,13 @@ use std::{
     time::{Duration, Instant},
 };
 
-struct App {
-    sites: Arc<Mutex<Vec<Site>>>,
-    output_fmt: OutputFmt,
-}
+use self::app::{cli::OutputFmt, App, Site};
 
-enum OutputFmt {
-    Bullet,
-    Line,
-}
-
-#[derive(Clone)]
-struct Site {
-    name: String,
-    addr: String,
-    status_code: Option<Result<u16, ()>>,
-}
-
-impl Site {
-    fn new(name: &str, addr: &str) -> Self {
-        Self {
-            name: name.to_string(),
-            addr: addr.to_string(),
-            status_code: None,
-        }
-    }
-}
+mod app;
 
 fn main() -> io::Result<()> {
+    let app = App::generate();
+
     // Set up terminal.
     enable_raw_mode()?;
     let mut stdout = std::io::stdout();
@@ -54,16 +33,6 @@ fn main() -> io::Result<()> {
 
     // Create app and run it.
     let ui_refresh_rate = Duration::from_millis(200);
-    let sites = vec![
-        Site::new("GitHub", "https://github.com"),
-        Site::new("Google", "https://google.com"),
-        Site::new("Steam", "https://steampowered.com"),
-    ];
-
-    let app = App {
-        sites: Arc::new(Mutex::new(sites)),
-        output_fmt: OutputFmt::Line,
-    };
 
     let res = commence_application(&mut terminal, ui_refresh_rate, &app);
 
