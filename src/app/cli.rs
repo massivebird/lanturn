@@ -14,6 +14,7 @@ pub(super) fn generate_matches() -> ArgMatches {
                 .short('o')
                 .value_parser([PossibleValue::new("bullet"), PossibleValue::new("line")])
                 .help("Output format (default: \"bullet\")")
+                .default_value("bullet")
                 .value_name("format")
                 .value_hint(clap::ValueHint::Other)
                 .required(false),
