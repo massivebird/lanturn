@@ -60,10 +60,9 @@ fn commence_application<B: Backend>(
     let mut last_tick = Instant::now();
 
     let sites = Arc::clone(&app.sites);
-    let num_sites = sites.lock().unwrap().len();
 
     thread::spawn(move || loop {
-        for idx in 0..num_sites {
+        for idx in 0..sites.lock().unwrap().len() {
             let sites = Arc::clone(&sites);
 
             thread::spawn(move || {
