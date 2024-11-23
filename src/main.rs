@@ -1,3 +1,4 @@
+use self::app::{cli::OutputFmt, App, Site};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -16,8 +17,6 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-
-use self::app::{cli::OutputFmt, App, Site};
 
 mod app;
 
