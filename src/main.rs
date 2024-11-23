@@ -15,6 +15,7 @@ use ratatui::{
 use std::{
     io,
     sync::{Arc, Mutex},
+    thread,
     time::{Duration, Instant},
 };
 
@@ -61,10 +62,16 @@ fn commence_application<B: Backend>(
     let sites = Arc::clone(&app.sites);
     let num_sites = sites.lock().unwrap().len();
 
-    std::thread::spawn(move || loop {
-        for idx in (0..num_sites).cycle() {
-            fetch_site(&Arc::clone(&sites), idx);
+    thread::spawn(move || loop {
+        for idx in 0..num_sites {
+            let sites = Arc::clone(&sites);
+
+            thread::spawn(move || {
+                fetch_site(sites, idx);
+            });
         }
+
+        thread::sleep(Duration::from_secs(10));
     });
 
     loop {
@@ -134,15 +141,15 @@ fn ui(f: &mut Frame, app: &App) {
     );
 }
 
-fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
+fn fetch_site(sites: Arc<Mutex<Vec<Site>>>, idx: usize) {
     let client = reqwest::blocking::Client::new()
         .get(sites.lock().unwrap().get(idx).unwrap().addr.clone())
         .timeout(Duration::from_secs(3));
 
-    let mut guard = sites.lock().unwrap();
-
-    guard.get_mut(idx).unwrap().status_code = client.send().map_or_else(
+    let status_code = client.send().map_or_else(
         |_| Some(Err(())),
         |response| Some(Ok(response.status().as_u16())),
     );
+
+    sites.lock().unwrap().get_mut(idx).unwrap().status_code = status_code;
 }
