@@ -123,7 +123,11 @@ fn ui(f: &mut Frame, app: &App) {
             OutputFmt::Line => Line::from(Span::from(format!(" {}", site.name.clone()))).style(
                 Style::new()
                     .bg(status_color)
-                    .fg(Color::Black)
+                    .fg(if status_color == Color::DarkGray {
+                        Color::DarkGray
+                    } else {
+                        Color::Black
+                    })
                     .add_modifier(Modifier::BOLD),
             ),
         };
