@@ -94,10 +94,7 @@ fn commence_application<B: Backend>(
 }
 
 fn ui(f: &mut Frame, app: &App) {
-    let sites = {
-        let guard = app.sites.lock().unwrap();
-        guard.clone()
-    };
+    let sites = app.sites.lock().unwrap().clone();
 
     let mut list_items: Vec<Line<'_>> = Vec::new();
 
@@ -106,7 +103,7 @@ fn ui(f: &mut Frame, app: &App) {
         // Green is OK, red is bad, etc.
         let status_color = {
             if site.status_code.is_none() {
-                Color::Red
+                Color::Gray // Requests have not been sent yet.
             } else {
                 match site.status_code.as_ref() {
                     Some(Ok(status_code)) => match status_code {
