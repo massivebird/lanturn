@@ -1,5 +1,7 @@
 use std::sync::{Arc, Mutex};
 
+use strum::FromRepr;
+
 use self::cli::{generate_matches, OutputFmt};
 
 pub mod cli;
@@ -21,9 +23,30 @@ impl Site {
     }
 }
 
+#[derive(Copy, Clone, FromRepr)]
+pub enum SelectedTab {
+    Live,
+    Chart,
+}
+
+impl SelectedTab {
+    fn next(self) -> Self {
+        let current_idx: usize = self as usize;
+        let next_idx: usize = current_idx.saturating_add(1);
+        Self::from_repr(next_idx).unwrap_or(self)
+    }
+
+    fn prev(self) -> Self {
+        let current_idx: usize = self as usize;
+        let prev_idx: usize = current_idx.saturating_sub(1);
+        Self::from_repr(prev_idx).unwrap_or(self)
+    }
+}
+
 pub struct App {
     pub sites: Arc<Mutex<Vec<Site>>>,
     pub output_fmt: OutputFmt,
+    pub selected_tab: SelectedTab,
 }
 
 impl App {
@@ -45,6 +68,15 @@ impl App {
         Self {
             sites: Arc::new(Mutex::new(sites)),
             output_fmt,
+            selected_tab: SelectedTab::Live,
         }
+    }
+
+    pub fn next_tab(&mut self) {
+        self.selected_tab = self.selected_tab.next();
+    }
+
+    pub fn prev_tab(&mut self) {
+        self.selected_tab = self.selected_tab.prev();
     }
 }

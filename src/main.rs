@@ -22,7 +22,7 @@ use std::{
 mod app;
 
 fn main() -> io::Result<()> {
-    let app = App::generate();
+    let mut app = App::generate();
 
     // Set up terminal.
     enable_raw_mode()?;
@@ -34,7 +34,7 @@ fn main() -> io::Result<()> {
     // Create app and run it.
     let ui_refresh_rate = Duration::from_millis(200);
 
-    let res = commence_application(&mut terminal, ui_refresh_rate, &app);
+    let res = commence_application(&mut terminal, ui_refresh_rate, &mut app);
 
     // Restore terminal.
     disable_raw_mode()?;
@@ -55,10 +55,8 @@ fn main() -> io::Result<()> {
 fn commence_application<B: Backend>(
     terminal: &mut Terminal<B>,
     ui_refresh_rate: Duration,
-    app: &App,
+    app: &mut App,
 ) -> io::Result<()> {
-    let mut last_tick = Instant::now();
-
     let sites = Arc::clone(&app.sites);
 
     thread::spawn(move || loop {
@@ -73,6 +71,8 @@ fn commence_application<B: Backend>(
         thread::sleep(Duration::from_secs(10));
     });
 
+    let mut last_tick = Instant::now();
+
     loop {
         terminal.draw(|f| ui(f, app))?;
 
@@ -81,8 +81,11 @@ fn commence_application<B: Backend>(
         // Maintains a consistent tick schedule while checking for input!
         if crossterm::event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
-                if key.code == KeyCode::Char('q') {
-                    return Ok(());
+                match key.code {
+                    KeyCode::Char('q') => return Ok(()),
+                    KeyCode::Char('l') => app.next_tab(),
+                    KeyCode::Char('h') => app.prev_tab(),
+                    _ => (),
                 }
             }
         }
