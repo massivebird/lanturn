@@ -57,8 +57,6 @@ fn commence_application<B: Backend>(
     ui_refresh_rate: Duration,
     app: &App,
 ) -> io::Result<()> {
-    let mut last_tick = Instant::now();
-
     let sites = Arc::clone(&app.sites);
 
     thread::spawn(move || loop {
@@ -66,12 +64,14 @@ fn commence_application<B: Backend>(
             let sites = Arc::clone(&sites);
 
             thread::spawn(move || {
-                fetch_site(sites, idx);
+                fetch_site(&sites, idx);
             });
         }
 
         thread::sleep(Duration::from_secs(10));
     });
+
+    let mut last_tick = Instant::now();
 
     loop {
         terminal.draw(|f| ui(f, app))?;
@@ -93,7 +93,7 @@ fn commence_application<B: Backend>(
     }
 }
 
-fn fetch_site(sites: Arc<Mutex<Vec<Site>>>, idx: usize) {
+fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
     let client = reqwest::blocking::Client::new()
         .get(sites.lock().unwrap().get(idx).unwrap().addr.clone())
         .timeout(Duration::from_secs(3));
