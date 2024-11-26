@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 
 use strum::FromRepr;
@@ -10,7 +11,8 @@ pub mod cli;
 pub struct Site {
     pub name: String,
     pub addr: String,
-    pub status_code: Option<Result<u16, ()>>,
+    status_codes: VecDeque<Option<Result<u16, ()>>>,
+    status_len: usize,
 }
 
 impl Site {
@@ -18,8 +20,25 @@ impl Site {
         Self {
             name: name.to_string(),
             addr: addr.to_string(),
-            status_code: None,
+            status_codes: vec![None; 10].into(),
+            status_len: 10,
         }
+    }
+
+    pub fn push_status_code(&mut self, code: Option<Result<u16, ()>>) {
+        if self.status_codes.len() == self.status_len {
+            self.status_codes.pop_back();
+        }
+
+        self.status_codes.push_front(code);
+    }
+
+    pub fn get_status_codes(&self) -> VecDeque<Option<Result<u16, ()>>> {
+        self.status_codes
+    }
+
+    pub const fn get_status_len(&self) -> usize {
+        self.status_len
     }
 }
 

@@ -23,10 +23,10 @@ fn render_tab_live(f: &mut Frame, app: &App) {
         // Computing the color reflective of online status.
         // Green is OK, red is bad, etc.
         let status_color = {
-            if site.status_code.is_none() {
+            if site.get_status_codes()[0].is_none() {
                 Color::Gray // Requests have not been sent yet.
             } else {
-                match site.status_code.as_ref() {
+                match site.get_status_codes()[0].as_ref() {
                     Some(Ok(status_code)) => match status_code {
                         200 => Color::Green,
                         _ => Color::Yellow,
@@ -63,14 +63,29 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_chart(f: &mut Frame, app: &App) {
+    let statuses = app.sites.as_ref().lock().unwrap()[0].get_status_codes().clone();
+
+    let len: usize = app.sites.as_ref().lock().unwrap()[0].get_status_len();
+
+    let mut data: [(f64, f64); len] = [(f64::MIN, f64::MIN); len];
+
+    for idx in 0..len {
+        let val = match statuses.get(idx) {
+            Some(s) => 1.,
+            None => f64::MIN,
+        };
+
+        data[idx] = (idx as f64, val);
+    }
+
     let dataset = ratatui::widgets::Dataset::default()
-        .data(&[(1., 2.), (2., 3.), (3., 5.)])
+        .data(&data)
         .marker(ratatui::symbols::Marker::Braille);
 
     let chart = Chart::new(vec![dataset])
         .block(ratatui::widgets::Block::bordered())
-        .x_axis(Axis::default().bounds([0., 5.]))
-        .y_axis(Axis::default().bounds([-5., 5.]));
+        .x_axis(Axis::default().bounds([0., len as f64]))
+        .y_axis(Axis::default().bounds([-2., 2.]));
 
     f.render_widget(chart, f.area())
 }

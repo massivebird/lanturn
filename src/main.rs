@@ -110,5 +110,10 @@ fn fetch_site(sites: Arc<Mutex<Vec<Site>>>, idx: usize) {
         |response| Some(Ok(response.status().as_u16())),
     );
 
-    sites.lock().unwrap().get_mut(idx).unwrap().status_code = status_code;
+    sites
+        .lock()
+        .unwrap()
+        .get_mut(idx)
+        .unwrap()
+        .push_status_code(status_code);
 }
