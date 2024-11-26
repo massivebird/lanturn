@@ -1,4 +1,7 @@
-use self::app::{cli::OutputFmt, App, Site};
+use self::{
+    app::{App, Site},
+    ui::ui,
+};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -6,11 +9,7 @@ use crossterm::{
 };
 use ratatui::{
     backend::{Backend, CrosstermBackend},
-    layout::Rect,
-    style::{Color, Modifier, Style},
-    text::{Line, Span},
-    widgets::List,
-    Frame, Terminal,
+    Terminal,
 };
 use std::{
     io,
@@ -20,6 +19,7 @@ use std::{
 };
 
 mod app;
+mod ui;
 
 fn main() -> io::Result<()> {
     let app = App::generate();
@@ -91,54 +91,6 @@ fn commence_application<B: Backend>(
             last_tick = Instant::now();
         }
     }
-}
-
-fn ui(f: &mut Frame, app: &App) {
-    let sites = app.sites.lock().unwrap().clone();
-
-    let mut list_items: Vec<Line<'_>> = Vec::new();
-
-    for site in &sites {
-        // Computing the color reflective of online status.
-        // Green is OK, red is bad, etc.
-        let status_color = {
-            if site.status_code.is_none() {
-                Color::Gray // Requests have not been sent yet.
-            } else {
-                match site.status_code.as_ref() {
-                    Some(Ok(status_code)) => match status_code {
-                        200 => Color::Green,
-                        _ => Color::Yellow,
-                    },
-                    _ => Color::Red,
-                }
-            }
-        };
-
-        let site_output: Line<'_> = match app.output_fmt {
-            OutputFmt::Bullet => Line::from(vec![
-                Span::from(" ■ ").style(status_color),
-                Span::from(site.name.clone()),
-            ]),
-            OutputFmt::Line => Line::from(Span::from(format!(" {}", site.name.clone()))).style(
-                Style::new()
-                    .bg(status_color)
-                    .fg(if status_color == Color::DarkGray {
-                        Color::DarkGray
-                    } else {
-                        Color::Black
-                    })
-                    .add_modifier(Modifier::BOLD),
-            ),
-        };
-
-        list_items.push(site_output);
-    }
-
-    f.render_widget(
-        List::new(list_items),
-        Rect::new(0, 0, f.area().width, f.area().height),
-    );
 }
 
 fn fetch_site(sites: Arc<Mutex<Vec<Site>>>, idx: usize) {
