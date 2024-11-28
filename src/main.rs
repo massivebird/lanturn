@@ -1,5 +1,5 @@
 use self::{
-    app::{App, Site},
+    app::{App, SelectedTab, Site},
     ui::ui,
 };
 use crossterm::{
@@ -85,6 +85,8 @@ fn commence_application<B: Backend>(
                     KeyCode::Char('q') => return Ok(()),
                     KeyCode::Char('l') => app.next_tab(),
                     KeyCode::Char('h') => app.prev_tab(),
+                    KeyCode::Char('k') if app.selected_tab == SelectedTab::Chart => app.prev_chart_site(),
+                    KeyCode::Char('j') if app.selected_tab == SelectedTab::Chart => app.next_chart_site(),
                     _ => (),
                 }
             }
