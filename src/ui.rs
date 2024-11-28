@@ -1,4 +1,4 @@
-use crate::app::{cli::OutputFmt, site::MAX_STATUSES, App, SelectedTab};
+use crate::app::{cli::OutputFmt, selected_tab::SelectedTab, site::MAX_STATUSES, App};
 use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style, Stylize},

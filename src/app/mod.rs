@@ -1,37 +1,11 @@
 use self::cli::{generate_matches, OutputFmt};
+use self::selected_tab::SelectedTab;
 use self::site::Site;
-use ratatui::text::Line;
 use std::sync::{Arc, Mutex};
-use strum::{Display, EnumIter, FromRepr};
 
 pub mod cli;
+pub mod selected_tab;
 pub mod site;
-
-#[derive(Copy, Clone, Display, FromRepr, EnumIter, PartialEq, Eq)]
-pub enum SelectedTab {
-    #[strum(to_string = "Live")]
-    Live,
-    #[strum(to_string = "Chart")]
-    Chart,
-}
-
-impl SelectedTab {
-    fn next(self) -> Self {
-        let current_idx: usize = self as usize;
-        let next_idx: usize = current_idx.saturating_add(1);
-        Self::from_repr(next_idx).unwrap_or(self)
-    }
-
-    fn prev(self) -> Self {
-        let current_idx: usize = self as usize;
-        let prev_idx: usize = current_idx.saturating_sub(1);
-        Self::from_repr(prev_idx).unwrap_or(self)
-    }
-
-    pub fn title(self) -> Line<'static> {
-        format!("  {self}  ").into()
-    }
-}
 
 pub struct App {
     pub sites: Arc<Mutex<Vec<Site>>>,
