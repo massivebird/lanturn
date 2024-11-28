@@ -79,7 +79,8 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_chart(f: &mut Frame, app: &App) {
-    let statuses = app.get_selected_chart_site().get_status_codes();
+    let site = app.get_selected_chart_site();
+    let statuses = site.get_status_codes();
 
     let bars: Vec<Bar> = statuses
         .iter()
@@ -118,8 +119,12 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
         .max(3)
         .data(BarGroup::default().bars(&bars));
 
+    let info = Line::from(format!(" Selected site: {} ", site.name));
+
     f.render_widget(
         barchart,
         Rect::new(0, 1, f.area().width, f.area().height - 1),
     );
+
+    f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1))
 }
