@@ -102,8 +102,13 @@ impl App {
         self.selected_tab = self.selected_tab.prev();
     }
 
-    pub const fn get_selected_chart_site(&self) -> usize {
-        self.selected_chart_site
+    pub fn get_selected_chart_site(&self) -> Site {
+        self.sites
+            .lock()
+            .unwrap()
+            .get(self.selected_chart_site)
+            .unwrap()
+            .clone()
     }
 
     pub fn next_chart_site(&mut self) {

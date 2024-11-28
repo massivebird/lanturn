@@ -79,7 +79,7 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_chart(f: &mut Frame, app: &App) {
-    let statuses = app.sites.as_ref().lock().unwrap()[0].get_status_codes();
+    let statuses = app.get_selected_chart_site().get_status_codes();
 
     let bars: Vec<Bar> = statuses
         .iter()
