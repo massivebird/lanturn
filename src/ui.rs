@@ -49,9 +49,14 @@ fn render_tab_live(f: &mut Frame, app: &App) {
         let site_output: Line<'_> = match app.output_fmt {
             OutputFmt::Bullet => Line::from(vec![
                 Span::from(" ■ ").style(status_color),
-                Span::from(site.name.clone()),
+                Span::from(format!("{} ({})", site.name.clone(), site.addr)),
             ]),
-            OutputFmt::Line => Line::from(Span::from(format!(" {}", site.name.clone()))).style(
+            OutputFmt::Line => Line::from(Span::from(format!(
+                " {} ({})",
+                site.name.clone(),
+                site.addr
+            )))
+            .style(
                 Style::new()
                     .bg(status_color)
                     .fg(if status_color == Color::DarkGray {
@@ -59,7 +64,8 @@ fn render_tab_live(f: &mut Frame, app: &App) {
                     } else {
                         Color::Black
                     })
-                    .add_modifier(Modifier::BOLD),
+                    .add_modifier(Modifier::BOLD)
+                    .add_modifier(Modifier::ITALIC),
             ),
         };
 
