@@ -1,5 +1,5 @@
 use self::{
-    app::{App, SelectedTab, Site},
+    app::{site::Site, App, SelectedTab},
     ui::ui,
 };
 use crossterm::{
