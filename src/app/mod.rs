@@ -20,6 +20,23 @@ impl App {
     pub fn generate() -> Self {
         let matches: clap::ArgMatches = generate_matches();
 
+        let sites = Self::read_sites_from_file();
+
+        let output_fmt = match matches.get_one::<String>("output_fmt").unwrap().as_str() {
+            "bullet" => OutputFmt::Bullet,
+            "line" => OutputFmt::Line,
+            _ => unreachable!(),
+        };
+
+        Self {
+            sites: Arc::new(Mutex::new(sites)),
+            output_fmt,
+            selected_tab: SelectedTab::Live,
+            selected_chart_site_idx: 0,
+        }
+    }
+
+    fn read_sites_from_file() -> Vec<Site> {
         let home_dir = std::env::var("HOME").unwrap();
         let config_path = format!("{home_dir}/.config/lanturn/config.yaml");
 
@@ -64,18 +81,7 @@ impl App {
             sites.push(Site::new(name, url));
         }
 
-        let output_fmt = match matches.get_one::<String>("output_fmt").unwrap().as_str() {
-            "bullet" => OutputFmt::Bullet,
-            "line" => OutputFmt::Line,
-            _ => unreachable!(),
-        };
-
-        Self {
-            sites: Arc::new(Mutex::new(sites)),
-            output_fmt,
-            selected_tab: SelectedTab::Live,
-            selected_chart_site_idx: 0,
-        }
+        sites
     }
 
     pub fn next_tab(&mut self) {
