@@ -22,7 +22,7 @@ mod app;
 mod ui;
 
 fn main() -> io::Result<()> {
-    let app = App::generate();
+    let mut app = App::generate();
 
     // Set up terminal.
     enable_raw_mode()?;
@@ -34,7 +34,7 @@ fn main() -> io::Result<()> {
     // Create app and run it.
     let ui_refresh_rate = Duration::from_millis(200);
 
-    let res = commence_application(&mut terminal, ui_refresh_rate, &app);
+    let res = commence_application(&mut terminal, ui_refresh_rate, &mut app);
 
     // Restore terminal.
     disable_raw_mode()?;
@@ -55,7 +55,7 @@ fn main() -> io::Result<()> {
 fn commence_application<B: Backend>(
     terminal: &mut Terminal<B>,
     ui_refresh_rate: Duration,
-    app: &App,
+    app: &mut App,
 ) -> io::Result<()> {
     let sites = Arc::clone(&app.sites);
 
@@ -64,11 +64,11 @@ fn commence_application<B: Backend>(
             let sites = Arc::clone(&sites);
 
             thread::spawn(move || {
-                fetch_site(&sites, idx);
+                fetch_site(sites, idx);
             });
         }
 
-        thread::sleep(Duration::from_secs(10));
+        thread::sleep(Duration::from_secs(5));
     });
 
     let mut last_tick = Instant::now();
@@ -81,8 +81,11 @@ fn commence_application<B: Backend>(
         // Maintains a consistent tick schedule while checking for input!
         if crossterm::event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
-                if key.code == KeyCode::Char('q') {
-                    return Ok(());
+                match key.code {
+                    KeyCode::Char('q') => return Ok(()),
+                    KeyCode::Char('l') => app.next_tab(),
+                    KeyCode::Char('h') => app.prev_tab(),
+                    _ => (),
                 }
             }
         }
@@ -93,7 +96,7 @@ fn commence_application<B: Backend>(
     }
 }
 
-fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
+fn fetch_site(sites: Arc<Mutex<Vec<Site>>>, idx: usize) {
     let client = reqwest::blocking::Client::new()
         .get(sites.lock().unwrap().get(idx).unwrap().addr.clone())
         .timeout(Duration::from_secs(3));
@@ -103,5 +106,10 @@ fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
         |response| Some(Ok(response.status().as_u16())),
     );
 
-    sites.lock().unwrap().get_mut(idx).unwrap().status_code = status_code;
+    sites
+        .lock()
+        .unwrap()
+        .get_mut(idx)
+        .unwrap()
+        .push_status_code(status_code);
 }

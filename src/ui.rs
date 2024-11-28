@@ -1,13 +1,20 @@
-use crate::app::{cli::OutputFmt, App};
+use crate::app::{cli::OutputFmt, App, SelectedTab, MAX_STATUSES};
 use ratatui::{
     layout::Rect,
-    style::{Color, Modifier, Style},
+    style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
-    widgets::List,
+    widgets::{Bar, BarChart, BarGroup, Block, List},
     Frame,
 };
 
 pub fn ui(f: &mut Frame, app: &App) {
+    match app.selected_tab {
+        SelectedTab::Live => render_tab_live(f, app),
+        SelectedTab::Chart => render_tab_chart(f, app),
+    }
+}
+
+fn render_tab_live(f: &mut Frame, app: &App) {
     let sites = app.sites.lock().unwrap().clone();
 
     let mut list_items: Vec<Line<'_>> = Vec::new();
@@ -16,10 +23,10 @@ pub fn ui(f: &mut Frame, app: &App) {
         // Computing the color reflective of online status.
         // Green is OK, red is bad, etc.
         let status_color = {
-            if site.status_code.is_none() {
+            if site.get_status_codes()[0].is_none() {
                 Color::Gray // Requests have not been sent yet.
             } else {
-                match site.status_code.as_ref() {
+                match site.get_status_codes()[0].as_ref() {
                     Some(Ok(status_code)) => match status_code {
                         200 => Color::Green,
                         _ => Color::Yellow,
@@ -53,4 +60,47 @@ pub fn ui(f: &mut Frame, app: &App) {
         List::new(list_items),
         Rect::new(0, 0, f.area().width, f.area().height),
     );
+}
+
+fn render_tab_chart(f: &mut Frame, app: &App) {
+    let statuses = app.sites.as_ref().lock().unwrap()[0].get_status_codes();
+
+    let bars: Vec<Bar> = statuses
+        .iter()
+        .enumerate()
+        .take(MAX_STATUSES)
+        .map(|(idx, s)| {
+            let val = s
+                .as_ref()
+                .map_or(u64::MIN, |s| s.map_or(1, |s| if s == 200 { 3 } else { 2 }));
+
+            let color = match val {
+                1 => Color::Red,
+                3 => Color::Green,
+                _ => Color::Yellow,
+            };
+
+            let bar_style = Style::new().fg(color);
+
+            Bar::default()
+                .value(val)
+                .style(bar_style)
+                .text_value(String::new())
+                .label(if idx == 0 {
+                    Line::from("Now")
+                } else {
+                    Line::from("")
+                })
+                .value_style(bar_style.reversed())
+        })
+        .collect();
+
+    let barchart = BarChart::default()
+        .block(Block::bordered())
+        .bar_gap(0)
+        .bar_width(3)
+        .max(3)
+        .data(BarGroup::default().bars(&bars));
+
+    f.render_widget(barchart, f.area())
 }
