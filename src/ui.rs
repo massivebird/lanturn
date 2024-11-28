@@ -79,7 +79,10 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_chart(f: &mut Frame, app: &App) {
-    let site = app.get_selected_chart_site();
+    let idx = app.get_selected_chart_site_idx();
+
+    let site = app.sites.lock().unwrap().get(idx).unwrap().clone();
+
     let statuses = site.get_status_codes();
 
     let bars: Vec<Bar> = statuses
@@ -119,7 +122,10 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
         .max(3)
         .data(BarGroup::default().bars(&bars));
 
-    let info = Line::from(format!(" Selected site: {} ", site.name));
+    let info = Line::from(format!(
+        " Selected site: [{idx:02}] {} ({}) ",
+        site.name, site.addr
+    ));
 
     f.render_widget(
         barchart,

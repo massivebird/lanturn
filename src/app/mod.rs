@@ -67,7 +67,7 @@ pub struct App {
     pub sites: Arc<Mutex<Vec<Site>>>,
     pub output_fmt: OutputFmt,
     pub selected_tab: SelectedTab,
-    selected_chart_site: usize,
+    selected_chart_site_idx: usize,
 }
 
 impl App {
@@ -77,7 +77,7 @@ impl App {
         let sites = vec![
             Site::new("GitHub", "https://github.com"),
             Site::new("Google", "https://google.com"),
-            Site::new("Steam", "https://steampowered.cow"),
+            Site::new("Steam", "https://steampowered.com"),
         ];
 
         let output_fmt = match matches.get_one::<String>("output_fmt").unwrap().as_str() {
@@ -90,7 +90,7 @@ impl App {
             sites: Arc::new(Mutex::new(sites)),
             output_fmt,
             selected_tab: SelectedTab::Live,
-            selected_chart_site: 0,
+            selected_chart_site_idx: 0,
         }
     }
 
@@ -102,22 +102,17 @@ impl App {
         self.selected_tab = self.selected_tab.prev();
     }
 
-    pub fn get_selected_chart_site(&self) -> Site {
-        self.sites
-            .lock()
-            .unwrap()
-            .get(self.selected_chart_site)
-            .unwrap()
-            .clone()
+    pub const fn get_selected_chart_site_idx(&self) -> usize {
+        self.selected_chart_site_idx
     }
 
     pub fn next_chart_site(&mut self) {
-        if self.selected_chart_site != self.sites.lock().unwrap().len() - 1 {
-            self.selected_chart_site += 1;
+        if self.selected_chart_site_idx != self.sites.lock().unwrap().len() - 1 {
+            self.selected_chart_site_idx += 1;
         }
     }
 
     pub fn prev_chart_site(&mut self) {
-        self.selected_chart_site = self.selected_chart_site.saturating_sub(1);
+        self.selected_chart_site_idx = self.selected_chart_site_idx.saturating_sub(1);
     }
 }
