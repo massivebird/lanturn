@@ -1,5 +1,5 @@
 use self::{
-    app::{cli::OutputFmt, App, Site},
+    app::{App, Site},
     ui::ui,
 };
 use crossterm::{
@@ -9,11 +9,7 @@ use crossterm::{
 };
 use ratatui::{
     backend::{Backend, CrosstermBackend},
-    layout::Rect,
-    style::{Color, Modifier, Style},
-    text::{Line, Span},
-    widgets::List,
-    Frame, Terminal,
+    Terminal,
 };
 use std::{
     io,

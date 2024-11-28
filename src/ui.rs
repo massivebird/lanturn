@@ -1,9 +1,9 @@
-use crate::app::{cli::OutputFmt, App, SelectedTab, LEN};
+use crate::app::{cli::OutputFmt, App, SelectedTab, MAX_STATUSES};
 use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
-    widgets::{Axis, Bar, BarChart, BarGroup, Block, Chart, List},
+    widgets::{Bar, BarChart, BarGroup, Block, List},
     Frame,
 };
 
@@ -65,13 +65,11 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 fn render_tab_chart(f: &mut Frame, app: &App) {
     let statuses = app.sites.as_ref().lock().unwrap()[0].get_status_codes();
 
-    let mut bars: Vec<Bar> = Vec::new();
-
-    let mut bars: Vec<Bar> = statuses
+    let bars: Vec<Bar> = statuses
         .iter()
-        .rev()
-        .take(LEN)
-        .map(|s| {
+        .enumerate()
+        .take(MAX_STATUSES)
+        .map(|(idx, s)| {
             let val = s
                 .as_ref()
                 .map_or(u64::MIN, |s| s.map_or(1, |s| if s == 200 { 3 } else { 2 }));
@@ -87,13 +85,21 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
             Bar::default()
                 .value(val)
                 .style(bar_style)
+                .text_value(String::new())
+                .label(if idx == 0 {
+                    Line::from("Now")
+                } else {
+                    Line::from("")
+                })
                 .value_style(bar_style.reversed())
         })
         .collect();
 
     let barchart = BarChart::default()
         .block(Block::bordered())
-        .bar_width(2)
+        .bar_gap(0)
+        .bar_width(3)
+        .max(3)
         .data(BarGroup::default().bars(&bars));
 
     f.render_widget(barchart, f.area())

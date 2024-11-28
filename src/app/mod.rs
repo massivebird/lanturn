@@ -1,13 +1,11 @@
+use self::cli::{generate_matches, OutputFmt};
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
-
 use strum::FromRepr;
-
-use self::cli::{generate_matches, OutputFmt};
 
 pub mod cli;
 
-pub const LEN: usize = 15;
+pub const MAX_STATUSES: usize = 50;
 
 #[derive(Clone)]
 pub struct Site {
@@ -21,12 +19,12 @@ impl Site {
         Self {
             name: name.to_string(),
             addr: addr.to_string(),
-            status_codes: vec![None; LEN].into(),
+            status_codes: vec![None; MAX_STATUSES].into(),
         }
     }
 
     pub fn push_status_code(&mut self, code: Option<Result<u16, ()>>) {
-        if self.status_codes.len() == LEN {
+        if self.status_codes.len() == MAX_STATUSES {
             self.status_codes.pop_back();
         }
 
