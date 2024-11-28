@@ -22,11 +22,7 @@ impl App {
 
         let sites = Self::read_sites_from_file();
 
-        let output_fmt = match matches.get_one::<String>("output_fmt").unwrap().as_str() {
-            "bullet" => OutputFmt::Bullet,
-            "line" => OutputFmt::Line,
-            _ => unreachable!(),
-        };
+        let output_fmt = *matches.get_one::<OutputFmt>("output_fmt").unwrap();
 
         Self {
             sites: Arc::new(Mutex::new(sites)),
