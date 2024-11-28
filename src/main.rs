@@ -104,7 +104,7 @@ fn commence_application<B: Backend>(
 
 fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
     let client = reqwest::blocking::Client::new()
-        .get(sites.lock().unwrap().get(idx).unwrap().addr.clone())
+        .get(sites.lock().unwrap().get(idx).unwrap().url.clone())
         .timeout(Duration::from_secs(3));
 
     let status_code = client.send().map_or_else(

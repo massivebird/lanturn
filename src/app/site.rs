@@ -5,7 +5,7 @@ pub const MAX_STATUSES: usize = 50;
 #[derive(Clone)]
 pub struct Site {
     pub name: String,
-    pub addr: String,
+    pub url: String,
     status_codes: VecDeque<Option<Result<u16, ()>>>,
 }
 
@@ -13,7 +13,7 @@ impl Site {
     pub(super) fn new(name: &str, addr: &str) -> Self {
         Self {
             name: name.to_string(),
-            addr: addr.to_string(),
+            url: addr.to_string(),
             status_codes: vec![None; MAX_STATUSES].into(),
         }
     }

@@ -49,12 +49,12 @@ fn render_tab_live(f: &mut Frame, app: &App) {
         let site_output: Line<'_> = match app.output_fmt {
             OutputFmt::Bullet => Line::from(vec![
                 Span::from(" ■ ").style(status_color),
-                Span::from(format!("{} ({})", site.name.clone(), site.addr)),
+                Span::from(format!("{} ({})", site.name.clone(), site.url)),
             ]),
             OutputFmt::Line => Line::from(Span::from(format!(
                 " {} ({})",
                 site.name.clone(),
-                site.addr
+                site.url
             )))
             .style(
                 Style::new()
@@ -124,7 +124,7 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
 
     let info = Line::from(format!(
         " Selected site: [{idx:02}] {} ({}) ",
-        site.name, site.addr
+        site.name, site.url
     ));
 
     f.render_widget(
