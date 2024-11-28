@@ -51,29 +51,28 @@ fn render_tab_live(f: &mut Frame, app: &App) {
                 Span::from(" ■ ").style(status_color),
                 Span::from(format!("{} ({})", site.name.clone(), site.url)),
             ]),
-            OutputFmt::Line => Line::from(Span::from(format!(
-                " {} ({})",
-                site.name.clone(),
-                site.url
-            )))
-            .style(
-                Style::new()
-                    .bg(status_color)
-                    .fg(if status_color == Color::DarkGray {
-                        Color::DarkGray
-                    } else {
-                        Color::Black
-                    })
-                    .add_modifier(Modifier::BOLD)
-                    .add_modifier(Modifier::ITALIC),
-            ),
+            OutputFmt::Line => {
+                Line::from(Span::from(format!(" {} ({})", site.name.clone(), site.url))).style(
+                    Style::new()
+                        .bg(status_color)
+                        .fg(if status_color == Color::DarkGray {
+                            Color::DarkGray
+                        } else {
+                            Color::Black
+                        })
+                        .add_modifier(Modifier::BOLD)
+                        .add_modifier(Modifier::ITALIC),
+                )
+            }
         };
 
         list_items.push(site_output);
     }
 
+    let block = Block::bordered().title_bottom(" q: Quit ");
+
     f.render_widget(
-        List::new(list_items).block(Block::bordered()),
+        List::new(list_items).block(block),
         Rect::new(0, 1, f.area().width, f.area().height),
     );
 }
@@ -115,8 +114,10 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
         })
         .collect();
 
+    let block = Block::bordered().title_bottom(" q: Quit | j: Next site | k: Previous site ");
+
     let barchart = BarChart::default()
-        .block(Block::bordered())
+        .block(block)
         .bar_gap(0)
         .bar_width(3)
         .max(3)
