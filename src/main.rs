@@ -72,7 +72,7 @@ fn commence_application<B: Backend>(
             });
         }
 
-        thread::sleep(Duration::from_secs(10));
+        thread::sleep(Duration::from_secs(1));
     });
 
     let mut last_tick = Instant::now();

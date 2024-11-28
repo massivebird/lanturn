@@ -7,14 +7,13 @@ use self::cli::{generate_matches, OutputFmt};
 
 pub mod cli;
 
-pub const LEN: usize = 50;
+pub const LEN: usize = 15;
 
 #[derive(Clone)]
 pub struct Site {
     pub name: String,
     pub addr: String,
     status_codes: VecDeque<Option<Result<u16, ()>>>,
-    status_len: usize,
 }
 
 impl Site {
@@ -22,13 +21,12 @@ impl Site {
         Self {
             name: name.to_string(),
             addr: addr.to_string(),
-            status_codes: vec![None; 10].into(),
-            status_len: 50,
+            status_codes: vec![None; LEN].into(),
         }
     }
 
     pub fn push_status_code(&mut self, code: Option<Result<u16, ()>>) {
-        if self.status_codes.len() == self.status_len {
+        if self.status_codes.len() == LEN {
             self.status_codes.pop_back();
         }
 
@@ -37,10 +35,6 @@ impl Site {
 
     pub fn get_status_codes(&self) -> VecDeque<Option<Result<u16, ()>>> {
         self.status_codes.clone()
-    }
-
-    pub const fn get_status_len(&self) -> usize {
-        self.status_len
     }
 }
 

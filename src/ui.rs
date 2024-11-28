@@ -1,9 +1,9 @@
 use crate::app::{cli::OutputFmt, App, SelectedTab, LEN};
 use ratatui::{
     layout::Rect,
-    style::{Color, Modifier, Style},
+    style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
-    widgets::{Axis, Chart, List},
+    widgets::{Axis, Bar, BarChart, BarGroup, Block, Chart, List},
     Frame,
 };
 
@@ -65,26 +65,36 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 fn render_tab_chart(f: &mut Frame, app: &App) {
     let statuses = app.sites.as_ref().lock().unwrap()[0].get_status_codes();
 
-    let mut data: [(f64, f64); LEN] = [(f64::MIN, f64::MIN); LEN];
+    let mut bars: Vec<Bar> = Vec::new();
 
-    for (idx, status) in statuses.iter().enumerate().take(LEN) {
-        let val = status
-            .as_ref()
-            .map_or(f64::MIN, |s| s.map_or(0., |s| if s == 200 { 1. } else { 0.5 }));
+    let mut bars: Vec<Bar> = statuses
+        .iter()
+        .rev()
+        .take(LEN)
+        .map(|s| {
+            let val = s
+                .as_ref()
+                .map_or(u64::MIN, |s| s.map_or(1, |s| if s == 200 { 3 } else { 2 }));
 
-        let dataset_idx = LEN - idx - 1;
+            let color = match val {
+                1 => Color::Red,
+                3 => Color::Green,
+                _ => Color::Yellow,
+            };
 
-        data[dataset_idx] = (dataset_idx as f64, val);
-    }
+            let bar_style = Style::new().fg(color);
 
-    let dataset = ratatui::widgets::Dataset::default()
-        .data(&data)
-        .marker(ratatui::symbols::Marker::Braille);
+            Bar::default()
+                .value(val)
+                .style(bar_style)
+                .value_style(bar_style.reversed())
+        })
+        .collect();
 
-    let chart = Chart::new(vec![dataset])
-        .block(ratatui::widgets::Block::bordered())
-        .x_axis(Axis::default().bounds([0., LEN as f64]))
-        .y_axis(Axis::default().bounds([-2., 2.]));
+    let barchart = BarChart::default()
+        .block(Block::bordered())
+        .bar_width(2)
+        .data(BarGroup::default().bars(&bars));
 
-    f.render_widget(chart, f.area())
+    f.render_widget(barchart, f.area())
 }
