@@ -1,4 +1,4 @@
-use crate::app::{cli::OutputFmt, App, SelectedTab};
+use crate::app::{cli::OutputFmt, App, SelectedTab, LEN};
 use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style},
@@ -63,19 +63,18 @@ fn render_tab_live(f: &mut Frame, app: &App) {
 }
 
 fn render_tab_chart(f: &mut Frame, app: &App) {
-    let statuses = app.sites.as_ref().lock().unwrap()[0].get_status_codes().clone();
+    let statuses = app.sites.as_ref().lock().unwrap()[0].get_status_codes();
 
-    let len: usize = app.sites.as_ref().lock().unwrap()[0].get_status_len();
+    let mut data: [(f64, f64); LEN] = [(f64::MIN, f64::MIN); LEN];
 
-    let mut data: [(f64, f64); len] = [(f64::MIN, f64::MIN); len];
+    for (idx, status) in statuses.iter().enumerate().take(LEN) {
+        let val = status
+            .as_ref()
+            .map_or(f64::MIN, |s| s.map_or(0., |s| if s == 200 { 1. } else { 0.5 }));
 
-    for idx in 0..len {
-        let val = match statuses.get(idx) {
-            Some(s) => 1.,
-            None => f64::MIN,
-        };
+        let dataset_idx = LEN - idx - 1;
 
-        data[idx] = (idx as f64, val);
+        data[dataset_idx] = (dataset_idx as f64, val);
     }
 
     let dataset = ratatui::widgets::Dataset::default()
@@ -84,7 +83,7 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
 
     let chart = Chart::new(vec![dataset])
         .block(ratatui::widgets::Block::bordered())
-        .x_axis(Axis::default().bounds([0., len as f64]))
+        .x_axis(Axis::default().bounds([0., LEN as f64]))
         .y_axis(Axis::default().bounds([-2., 2.]));
 
     f.render_widget(chart, f.area())

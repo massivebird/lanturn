@@ -7,6 +7,8 @@ use self::cli::{generate_matches, OutputFmt};
 
 pub mod cli;
 
+pub const LEN: usize = 50;
+
 #[derive(Clone)]
 pub struct Site {
     pub name: String,
@@ -21,7 +23,7 @@ impl Site {
             name: name.to_string(),
             addr: addr.to_string(),
             status_codes: vec![None; 10].into(),
-            status_len: 10,
+            status_len: 50,
         }
     }
 
@@ -34,7 +36,7 @@ impl Site {
     }
 
     pub fn get_status_codes(&self) -> VecDeque<Option<Result<u16, ()>>> {
-        self.status_codes
+        self.status_codes.clone()
     }
 
     pub const fn get_status_len(&self) -> usize {
