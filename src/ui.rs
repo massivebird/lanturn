@@ -3,11 +3,21 @@ use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
-    widgets::{Bar, BarChart, BarGroup, Block, List},
+    widgets::{Bar, BarChart, BarGroup, Block, List, Tabs},
     Frame,
 };
+use strum::IntoEnumIterator;
 
 pub fn ui(f: &mut Frame, app: &App) {
+    // Render tabs at the top.
+
+    let titles = SelectedTab::iter().map(SelectedTab::title);
+
+    let tabs = Tabs::new(titles).select(app.selected_tab as usize);
+
+    f.render_widget(tabs, Rect::new(0, 0, f.area().width, f.area().height));
+
+    // Render contents of selected tab.
     match app.selected_tab {
         SelectedTab::Live => render_tab_live(f, app),
         SelectedTab::Chart => render_tab_chart(f, app),
@@ -20,7 +30,7 @@ fn render_tab_live(f: &mut Frame, app: &App) {
     let mut list_items: Vec<Line<'_>> = Vec::new();
 
     for site in &sites {
-        // Computing the color reflective of online status.
+        // Compute online status color.
         // Green is OK, red is bad, etc.
         let status_color = {
             if site.get_status_codes()[0].is_none() {
@@ -57,8 +67,8 @@ fn render_tab_live(f: &mut Frame, app: &App) {
     }
 
     f.render_widget(
-        List::new(list_items),
-        Rect::new(0, 0, f.area().width, f.area().height),
+        List::new(list_items).block(Block::bordered()),
+        Rect::new(0, 1, f.area().width, f.area().height),
     );
 }
 
@@ -102,5 +112,8 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
         .max(3)
         .data(BarGroup::default().bars(&bars));
 
-    f.render_widget(barchart, f.area())
+    f.render_widget(
+        barchart,
+        Rect::new(0, 1, f.area().width, f.area().height - 1),
+    );
 }

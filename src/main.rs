@@ -64,7 +64,7 @@ fn commence_application<B: Backend>(
             let sites = Arc::clone(&sites);
 
             thread::spawn(move || {
-                fetch_site(sites, idx);
+                fetch_site(&sites, idx);
             });
         }
 
@@ -96,7 +96,7 @@ fn commence_application<B: Backend>(
     }
 }
 
-fn fetch_site(sites: Arc<Mutex<Vec<Site>>>, idx: usize) {
+fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {
     let client = reqwest::blocking::Client::new()
         .get(sites.lock().unwrap().get(idx).unwrap().addr.clone())
         .timeout(Duration::from_secs(3));

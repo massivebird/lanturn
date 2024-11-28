@@ -1,7 +1,8 @@
 use self::cli::{generate_matches, OutputFmt};
+use ratatui::text::Line;
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
-use strum::FromRepr;
+use strum::{Display, EnumIter, FromRepr};
 
 pub mod cli;
 
@@ -36,9 +37,11 @@ impl Site {
     }
 }
 
-#[derive(Copy, Clone, FromRepr)]
+#[derive(Copy, Clone, Display, FromRepr, EnumIter)]
 pub enum SelectedTab {
+    #[strum(to_string = "Live")]
     Live,
+    #[strum(to_string = "Chart")]
     Chart,
 }
 
@@ -53,6 +56,10 @@ impl SelectedTab {
         let current_idx: usize = self as usize;
         let prev_idx: usize = current_idx.saturating_sub(1);
         Self::from_repr(prev_idx).unwrap_or(self)
+    }
+
+    pub fn title(self) -> Line<'static> {
+        format!("  {self}  ").into()
     }
 }
 
