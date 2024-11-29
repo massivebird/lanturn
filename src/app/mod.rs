@@ -42,16 +42,15 @@ impl App {
 
         assert!(
             Path::new(&config_path).exists(),
-            "Unable to locate config file at {}",
-            config_path,
+            "Unable to locate config file at {config_path}",
         );
 
         let Ok(config_contents) = std::fs::read_to_string(config_path.clone()) else {
-            panic!("Unable to read config file at {}", config_path);
+            panic!("Unable to read config file at {config_path}");
         };
 
         let Ok(yaml) = yaml_rust2::YamlLoader::load_from_str(&config_contents) else {
-            panic!("Failed to parse config file at {} into yaml.", config_path)
+            panic!("Failed to parse config file at {config_path} into yaml.")
         };
 
         let sites_yaml: &Yaml = &yaml[0]["sites"];

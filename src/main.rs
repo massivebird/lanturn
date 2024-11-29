@@ -60,7 +60,8 @@ fn commence_application<B: Backend>(
     let sites = Arc::clone(&app.sites);
 
     thread::spawn(move || loop {
-        for idx in 0..sites.lock().unwrap().len() {
+        let num_sites = sites.lock().unwrap().len();
+        for idx in 0..num_sites {
             let sites = Arc::clone(&sites);
 
             thread::spawn(move || {
@@ -86,10 +87,10 @@ fn commence_application<B: Backend>(
                     KeyCode::Char('l') => app.next_tab(),
                     KeyCode::Char('h') => app.prev_tab(),
                     KeyCode::Char('j') if app.selected_tab == SelectedTab::Chart => {
-                        app.next_chart_site()
+                        app.next_chart_site();
                     }
                     KeyCode::Char('k') if app.selected_tab == SelectedTab::Chart => {
-                        app.prev_chart_site()
+                        app.prev_chart_site();
                     }
                     _ => (),
                 }

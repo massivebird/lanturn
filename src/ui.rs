@@ -133,5 +133,5 @@ fn render_tab_chart(f: &mut Frame, app: &App) {
         Rect::new(0, 1, f.area().width, f.area().height - 1),
     );
 
-    f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1))
+    f.render_widget(info, Rect::new(2, 1, f.area().width, f.area().height - 1));
 }
