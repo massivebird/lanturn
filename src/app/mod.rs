@@ -9,6 +9,7 @@ pub mod cli;
 pub mod selected_tab;
 pub mod site;
 
+#[derive(Default)]
 pub struct App {
     pub sites: Arc<Mutex<Vec<Site>>>,
     pub output_fmt: OutputFmt,
@@ -22,13 +23,15 @@ impl App {
 
         let sites = Self::read_sites_from_file();
 
-        let output_fmt = *matches.get_one::<OutputFmt>("output_fmt").unwrap();
+        let output_fmt = match matches.get_one::<OutputFmt>("output_fmt") {
+            Some(&fmt) => fmt,
+            None => OutputFmt::default(),
+        };
 
         Self {
             sites: Arc::new(Mutex::new(sites)),
             output_fmt,
-            selected_tab: SelectedTab::Live,
-            selected_chart_site_idx: 0,
+            ..Default::default()
         }
     }
 

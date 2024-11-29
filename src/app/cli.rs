@@ -1,10 +1,11 @@
 use clap::builder::{EnumValueParser, PossibleValue};
 use clap::{Arg, ArgMatches, ValueEnum, ValueHint};
 
-#[derive(Copy, Clone)]
+#[derive(Default, Copy, Clone)]
 pub enum OutputFmt {
-    Bullet,
+    #[default]
     Line,
+    Bullet,
 }
 
 impl ValueEnum for OutputFmt {
@@ -27,8 +28,7 @@ pub(super) fn generate_matches() -> ArgMatches {
                 .long("output-fmt")
                 .short('o')
                 .value_parser(EnumValueParser::<OutputFmt>::new())
-                .help("Output format (default: \"bullet\")")
-                .default_value("bullet")
+                .help("Output format")
                 .value_name("format")
                 .value_hint(ValueHint::Other)
                 .required(false),
