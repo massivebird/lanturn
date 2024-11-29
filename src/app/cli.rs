@@ -1,27 +1,5 @@
-use clap::{
-    builder::{EnumValueParser, PossibleValue},
-    Arg, ArgMatches, ValueEnum, ValueHint,
-};
-
-#[derive(Default, Copy, Clone)]
-pub enum OutputFmt {
-    #[default]
-    Line,
-    Bullet,
-}
-
-impl ValueEnum for OutputFmt {
-    fn value_variants<'a>() -> &'a [Self] {
-        &[Self::Bullet, Self::Line]
-    }
-
-    fn to_possible_value(&self) -> Option<PossibleValue> {
-        match self {
-            Self::Bullet => Some(PossibleValue::new("bullet")),
-            Self::Line => Some(PossibleValue::new("line")),
-        }
-    }
-}
+use crate::app::OutputFmt;
+use clap::{builder::EnumValueParser, Arg, ArgMatches, ValueEnum, ValueHint};
 
 pub(super) fn generate_matches() -> ArgMatches {
     clap::command!()
