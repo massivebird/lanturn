@@ -48,3 +48,33 @@ environment.systemPackages = [
   # ...
 ]
 ```
+
+## Configuration
+
+Lanturn reads from a config file at `$HOME/.config/lanturn/config.yaml`.
+
+Use the following as a template:
+
+```yaml
+# $HOME/.config/lanturn/config.yaml
+
+sites: # All websites go under here.
+  github:                      # A site "label." This can be whatever you want!
+    name: "GitHub"             # Human-readable site name.
+    url: "https://github.com"  # Site URL.
+  steam:
+    name: "Steam"
+    url: "https://steampowered.com"
+  google:
+    name: "Google"
+    url: "https://google.com"
+  habbo:
+    name: "Habbo Hotel"
+    url: "https://www.habbo.com"
+  canvas:
+    name: "Canvas"
+    url: "https://canvas.emich.edu"
+  emich:
+    name: "My Emich"
+    url: "https://my.emich.edu"
+```
