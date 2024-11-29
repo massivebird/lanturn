@@ -1,5 +1,7 @@
-use clap::builder::{EnumValueParser, PossibleValue};
-use clap::{Arg, ArgMatches, ValueEnum, ValueHint};
+use clap::{
+    builder::{EnumValueParser, PossibleValue},
+    Arg, ArgMatches, ValueEnum, ValueHint,
+};
 
 #[derive(Default, Copy, Clone)]
 pub enum OutputFmt {

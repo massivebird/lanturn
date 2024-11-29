@@ -1,8 +1,12 @@
-use self::cli::{generate_matches, OutputFmt};
-use self::selected_tab::SelectedTab;
-use self::site::Site;
-use std::path::Path;
-use std::sync::{Arc, Mutex};
+use self::{
+    cli::{generate_matches, OutputFmt},
+    selected_tab::SelectedTab,
+    site::Site,
+};
+use std::{
+    path::Path,
+    sync::{Arc, Mutex},
+};
 use yaml_rust2::Yaml;
 
 pub mod cli;
