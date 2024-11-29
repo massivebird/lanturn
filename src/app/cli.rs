@@ -28,7 +28,13 @@ pub(super) fn generate_matches() -> ArgMatches {
                 .long("output-fmt")
                 .short('o')
                 .value_parser(EnumValueParser::<OutputFmt>::new())
-                .help("Output format")
+                .help(format!(
+                    // I can't figure out how to dynamically use clap's
+                    // `.default_value()` with `OutputFmt::default()`,
+                    // so you get this instead.
+                    "Output format [default: {}]",
+                    OutputFmt::default().to_possible_value().unwrap().get_name()
+                ))
                 .value_name("format")
                 .value_hint(ValueHint::Other)
                 .required(false),
