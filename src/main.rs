@@ -61,6 +61,7 @@ fn commence_application<B: Backend>(
 
     thread::spawn(move || loop {
         let num_sites = sites.lock().unwrap().len();
+
         for idx in 0..num_sites {
             let sites = Arc::clone(&sites);
 
@@ -78,29 +79,38 @@ fn commence_application<B: Backend>(
         terminal.draw(|f| ui(f, app))?;
 
         let timeout = ui_refresh_rate.saturating_sub(last_tick.elapsed());
-        // Polls for the remaining time until the next scheduled tick.
-        // Maintains a consistent tick schedule while checking for input!
+
         if crossterm::event::poll(timeout)? {
-            if let Event::Key(key) = event::read()? {
-                match key.code {
-                    KeyCode::Char('q') => return Ok(()),
-                    KeyCode::Char('l') => app.next_tab(),
-                    KeyCode::Char('h') => app.prev_tab(),
-                    KeyCode::Char('j') if app.selected_tab == SelectedTab::Chart => {
-                        app.next_chart_site();
-                    }
-                    KeyCode::Char('k') if app.selected_tab == SelectedTab::Chart => {
-                        app.prev_chart_site();
-                    }
-                    _ => (),
-                }
-            }
+            handle_events(app)?;
+        }
+
+        if app.is_closing() {
+            return Ok(());
         }
 
         if last_tick.elapsed() >= ui_refresh_rate {
             last_tick = Instant::now();
         }
     }
+}
+
+fn handle_events(app: &mut App) -> io::Result<()> {
+    if let Event::Key(key) = event::read()? {
+        match key.code {
+            KeyCode::Char('q') => app.close(),
+            KeyCode::Char('l') => app.next_tab(),
+            KeyCode::Char('h') => app.prev_tab(),
+            KeyCode::Char('j') if app.selected_tab == SelectedTab::Chart => {
+                app.next_chart_site();
+            }
+            KeyCode::Char('k') if app.selected_tab == SelectedTab::Chart => {
+                app.prev_chart_site();
+            }
+            _ => (),
+        }
+    }
+
+    Ok(())
 }
 
 fn fetch_site(sites: &Arc<Mutex<Vec<Site>>>, idx: usize) {

@@ -16,6 +16,7 @@ pub struct App {
     pub output_fmt: OutputFmt,
     pub selected_tab: SelectedTab,
     selected_chart_site_idx: usize,
+    is_closing: bool,
 }
 
 impl App {
@@ -103,5 +104,13 @@ impl App {
 
     pub fn prev_chart_site(&mut self) {
         self.selected_chart_site_idx = self.selected_chart_site_idx.saturating_sub(1);
+    }
+
+    pub fn close(&mut self) {
+        self.is_closing = true;
+    }
+
+    pub const fn is_closing(&self) -> bool {
+        self.is_closing
     }
 }
