@@ -36,7 +36,7 @@ fn main() -> eyre::Result<()> {
     let mut terminal = Terminal::new(backend)?;
 
     // Create app and run it.
-    let ui_refresh_rate = Duration::from_millis(200);
+    let ui_refresh_rate = Duration::from_millis(100);
     let res = start_app(&mut terminal, ui_refresh_rate, &mut app);
 
     // App is quitting!
@@ -86,7 +86,7 @@ fn start_app<B: Backend>(
     let mut last_tick = Instant::now();
 
     loop {
-        terminal.draw(|f| ui(f, app))?;
+        terminal.draw(|f| ui(f, app)).unwrap();
 
         let timeout = ui_refresh_rate.saturating_sub(last_tick.elapsed());
 

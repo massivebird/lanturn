@@ -8,10 +8,10 @@ clap = { version = "4.5.21", features = ["cargo"] }
 colored = "2.1.0"
 crossterm = "0.28.1"
 log = "0.4.22"
-ratatui = "0.29.0"
+ratatui = "0.30.0"
 reqwest = { version = "0.12.9", features = ["blocking"] }
 simplelog = "0.12.2"
-strum = "0.26.3"
+strum = "0.27.0"
 toml = "0.9.11"
 serde = { version = "1.0.228", features = ["derive"] }
 ping = "0.7.1-beta.1"

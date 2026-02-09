@@ -4,7 +4,7 @@ use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span},
-    widgets::{Block, List, Paragraph},
+    widgets::{Block, List, Paragraph, Wrap},
 };
 
 pub fn render_tab_live(f: &mut Frame, app: &App) {
@@ -70,7 +70,8 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
 
             Line::from(vec![
                 Span::from(indicator),
-                Span::from(format!("[{j:02}]")).style(Style::new().bg(color).fg(Color::Black).bold()),
+                Span::from(format!("[{j:02}]"))
+                    .style(Style::new().bg(color).fg(Color::Black).bold()),
             ])
         })
         .collect();
@@ -100,11 +101,11 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
             let color_pop = if chrono::Local::now()
                 .signed_duration_since(time)
                 .num_milliseconds()
-                < 75
+                < 350
             {
-                Span::styled("░░░░░░░", Style::new().bg(color).fg(Color::Black).bold())
+                Span::styled("░░░░░░░", Style::new().bg(color).fg(Color::Black))
             } else {
-                Span::styled("       ", Style::new().bg(color))
+                Span::styled("███████", Style::new().fg(color))
             };
 
             let guide = {
@@ -133,7 +134,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
         .collect();
 
     f.render_widget(
-        Paragraph::new(log_txt).block(Block::bordered()),
+        Paragraph::new(log_txt).block(Block::bordered()).wrap(Wrap { trim: true }),
         Rect::new(sidebar_width, 1, f.area().width, f.area().height - 1),
     );
 
