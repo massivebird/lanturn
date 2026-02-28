@@ -95,15 +95,9 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
 
             let color = status.generate_color(&log_conn.addr);
 
-            let time = status.timestamp();
-
             // Make the latest status distinct.
-            let color_pop = if chrono::Local::now()
-                .signed_duration_since(time)
-                .num_milliseconds()
-                < 350
-            {
-                Span::styled("░░░░░░░", Style::new().bg(color).fg(Color::Black))
+            let color_pop = if status.is_recent() {
+                Span::styled("░░░░░░░", Style::new().bg(color).fg(Color::Black).bold())
             } else {
                 Span::styled("███████", Style::new().fg(color))
             };
@@ -128,7 +122,7 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
                 Span::raw(" "),
                 Span::raw(desc),
                 Span::from(guide).fg(Color::Gray),
-                Span::raw(time.to_string()),
+                Span::raw(status.timestamp().to_string()),
             ])
         })
         .collect();

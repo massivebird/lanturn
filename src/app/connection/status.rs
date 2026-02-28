@@ -52,6 +52,13 @@ impl Status {
         self.time
     }
 
+    pub fn is_recent(&self) -> bool {
+        chrono::Local::now()
+            .signed_duration_since(self.time)
+            .num_milliseconds()
+            < 275
+    }
+
     pub const fn generate_color(&self, addr: &Address) -> Color {
         let Ok(code) = self.code() else {
             return Color::Red;
