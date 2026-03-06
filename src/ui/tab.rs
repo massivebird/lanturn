@@ -128,7 +128,9 @@ pub fn render_tab_log(f: &mut Frame, app: &App) {
         .collect();
 
     f.render_widget(
-        Paragraph::new(log_txt).block(Block::bordered()).wrap(Wrap { trim: true }),
+        Paragraph::new(log_txt)
+            .block(Block::bordered())
+            .wrap(Wrap { trim: true }),
         Rect::new(sidebar_width, 1, f.area().width, f.area().height - 1),
     );
 

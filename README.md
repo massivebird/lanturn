@@ -5,8 +5,8 @@
 <div align="center">
 
   <!-- <a href="">![](https://img.shields.io/github/v/release/massivebird/lantern)</a> -->
-  <a href="">![](https://img.shields.io/github/actions/workflow/status/massivebird/lantern/rust.yml)</a>
-  <a href="">![](https://img.shields.io/badge/Built_With-Ratatui-000?logo=ratatui&logoColor=fff&labelColor=000&color=fff)</a>
+  <a href="https://github.com/massivebird/lantern/actions">![](https://img.shields.io/github/actions/workflow/status/massivebird/lantern/rust.yml)</a>
+  <a href="https://ratatui.rs/">![](https://img.shields.io/badge/Built_With-Ratatui-000?logo=ratatui&logoColor=fff&labelColor=000&color=fff)</a>
 
 </div>
 
