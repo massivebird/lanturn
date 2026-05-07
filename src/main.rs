@@ -109,6 +109,7 @@ fn handle_events(app: &mut App) -> io::Result<()> {
     if let Event::Key(key) = event::read()? {
         match key.code {
             KeyCode::Char('q' | 'Q') => app.close(),
+            KeyCode::Char('p') => app.paused ^= app.paused,
             KeyCode::Char('l') => app.next_tab(),
             KeyCode::Char('h') => app.prev_tab(),
             KeyCode::Char('o') if app.selected_tab == SelectedTab::Summary => {

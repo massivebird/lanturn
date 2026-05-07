@@ -16,6 +16,8 @@ pub struct App {
     pub connections: Arc<Mutex<Vec<Connection>>>,
     pub output_fmt: OutputFmt,
 
+    pub paused: bool,
+
     /// The index of the connection displayed in the Log tab.
     pub selected_tab: SelectedTab,
 

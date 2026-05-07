@@ -61,16 +61,29 @@ environment.systemPackages = [
 
 Lantern reads the config file at `$HOME/.config/lantern/config.toml`.
 
-The schema looks something like this:
+The schema supports multiple types of connections, including JSON APIs:
 
 ```toml
 # $HOME/.config/lantern/config.toml
 
+# Remote website (HTTP address)
 [[connection]]
 name = "GitHub"
 addr = "https://github.com"
 
+# Local network machine (IP address)
 [[connection]]
 name = "PC"
-addr = "192.168.1.159" # Local machine IP
+addr = "192.168.1.159"
+
+# JSON API via HTTP
+[[json]]
+name = "GitHub Issues"
+addr = "https://www.githubstatus.com/api/v2/components.json"
+# JSON value to observe
+field = "components[4].status"
+# Compare value to these patterns
+ok = "operational"
+warn = "degraded_performance"
+alert = "minor_outage|major_outage"
 ```
